@@ -27,6 +27,37 @@ function wmo (code: number): [string, string] {
 	return WMO[code] || ['—', '🌡'];
 }
 
+export interface GeoResult {
+	name: string;
+	latitude: number;
+	longitude: number;
+	/** "City, Region, Country" for the results list */
+	label: string;
+}
+
+interface RawGeo {
+	name: string; latitude: number; longitude: number;
+	admin1?: string; country?: string;
+}
+
+/** City search via Open-Meteo's free geocoding API (no key). Returns [] for a
+ *  blank query or on error, so callers can render "no matches" simply. */
+export function searchCity (query: string): Promise<GeoResult[]> {
+	const q = query.trim();
+	if (!q) return Promise.resolve([]);
+	const url = 'https://geocoding-api.open-meteo.com/v1/search' +
+		`?name=${encodeURIComponent(q)}&count=6&language=en&format=json`;
+	return fetch(url)
+		.then((r) => { if (!r.ok) throw new Error(`geocode ${r.status}`); return r.json(); })
+		.then((d) => ((d.results as RawGeo[] | undefined) || []).map((g) => ({
+			name: g.name,
+			latitude: g.latitude,
+			longitude: g.longitude,
+			label: [g.name, g.admin1, g.country].filter(Boolean).join(', ')
+		})))
+		.catch(() => []);
+}
+
 /** Current conditions + next 5 hours + 3-day outlook, one Open-Meteo call. */
 export function fetchForecast (loc = LOCATION): Promise<Forecast> {
 	const url = 'https://api.open-meteo.com/v1/forecast' +

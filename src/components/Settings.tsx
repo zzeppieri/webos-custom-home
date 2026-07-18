@@ -1,18 +1,20 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, type RefObject} from 'react';
 import {APP_VERSION, type HomeConfig} from '../lib/config';
 import {resetOrder, CATS, type CatId} from '../lib/order';
 import {SCREENS} from '../lib/screens';
 import type {AppItem} from '../lib/apps';
+import {searchCity, type GeoResult} from '../service/weather';
 
 // Remote-driven settings overlay (QOL config GUI). Up/Down picks a row,
 // Left/Right cycles its value (saved immediately by App), OK fires actions,
-// Back closes (or leaves the Manage-apps pane). No blur (TV GPU).
+// Back closes (or leaves a sub-pane). No blur (TV GPU).
 
 const ACCENT = '#7ca8ff';
 
 type Row =
 	| {kind: 'choice'; label: string; values: string[]; labels: string[]; get: (c: HomeConfig) => string; set: (c: HomeConfig, v: string) => HomeConfig}
 	| {kind: 'action'; label: string; hint: string; action: 'reset' | 'apps'}
+	| {kind: 'location'; label: string}
 	| {kind: 'info'; label: string; value: string};
 
 const ROWS: Row[] = [
@@ -24,6 +26,7 @@ const ROWS: Row[] = [
 		kind: 'choice', label: 'Temperature', values: ['fahrenheit', 'celsius'], labels: ['°F', '°C'],
 		get: (c) => c.tempUnit, set: (c, v) => ({...c, tempUnit: v as HomeConfig['tempUnit']})
 	},
+	{kind: 'location', label: 'Location'},
 	{
 		kind: 'choice', label: 'Background animation', values: ['on', 'off'], labels: ['On', 'Off'],
 		get: (c) => (c.bgAnimated ? 'on' : 'off'), set: (c, v) => ({...c, bgAnimated: v === 'on'})
@@ -44,6 +47,9 @@ const ROWS: Row[] = [
 	{kind: 'action', label: 'Reset app order', hint: 'OK to reset', action: 'reset'},
 	{kind: 'info', label: 'Version', value: `v${APP_VERSION}`}
 ];
+
+const LOCATION_ROW = ROWS.findIndex((r) => r.kind === 'location');
+const APPS_ROW = ROWS.findIndex((r) => r.kind === 'action' && r.action === 'apps');
 
 // Manage-apps pane: every app across all categories; OK (handled by the parent
 // key handler) toggles shown/hidden.
@@ -89,6 +95,60 @@ function AppsPane ({lists, hidden, row}: {lists: Record<CatId, AppItem[]>; hidde
 	);
 }
 
+// Location pane: focus the input → the TV's on-screen keyboard opens; typing
+// searches Open-Meteo's geocoder (debounced). ↓/OK drops focus into the results
+// list; OK there saves the city. Back steps out (results → input → settings).
+function LocationPane ({inputRef, query, setQuery, results, searching, mode, resultRow, currentName}: {
+	inputRef: RefObject<HTMLInputElement>;
+	query: string;
+	setQuery: (v: string) => void;
+	results: GeoResult[];
+	searching: boolean;
+	mode: 'type' | 'pick';
+	resultRow: number;
+	currentName: string;
+}) {
+	return (
+		<div className="flex flex-col gap-3">
+			<div className="px-1 text-base text-white/45">Current: <span className="text-white/80">{currentName}</span></div>
+			<input
+				ref={inputRef}
+				value={query}
+				onChange={(e) => setQuery(e.target.value)}
+				placeholder="Search for a city…"
+				spellCheck={false}
+				autoComplete="off"
+				className="w-full rounded-2xl px-6 py-4 text-xl text-white/95 outline-none"
+				style={{
+					background: 'rgba(255,255,255,0.06)',
+					border: `1px solid ${mode === 'type' ? `${ACCENT}aa` : 'rgba(255,255,255,0.14)'}`
+				}}
+			/>
+			<div className="flex max-h-[38vh] min-h-[6rem] flex-col gap-1 overflow-y-auto pr-1">
+				{searching && <div className="px-6 py-3 text-lg text-white/45">Searching…</div>}
+				{!searching && !!query.trim() && results.length === 0 && (
+					<div className="px-6 py-3 text-lg text-white/45">No matches</div>
+				)}
+				{results.map((g, i) => {
+					const focused = mode === 'pick' && i === resultRow;
+					return (
+						<div
+							key={`${g.label}-${g.latitude}-${g.longitude}`}
+							className="flex items-center rounded-2xl px-6 py-3"
+							style={{
+								background: focused ? `${ACCENT}1f` : 'transparent',
+								border: `1px solid ${focused ? `${ACCENT}66` : 'transparent'}`
+							}}
+						>
+							<span className="text-lg font-medium text-white/90">{g.label}</span>
+						</div>
+					);
+				})}
+			</div>
+		</div>
+	);
+}
+
 export default function Settings ({config, onChange, onClose, onOrderReset, lists, hidden, onToggleHide}: {
 	config: HomeConfig;
 	onChange: (c: HomeConfig) => void;
@@ -98,9 +158,17 @@ export default function Settings ({config, onChange, onClose, onOrderReset, list
 	hidden: Set<string>;
 	onToggleHide: (id: string) => void;
 }) {
-	const [pane, setPane] = useState<'main' | 'apps'>('main');
+	const [pane, setPane] = useState<'main' | 'apps' | 'location'>('main');
 	const [row, setRow] = useState(0);
 	const [resetDone, setResetDone] = useState(false);
+
+	// location-pane state
+	const [query, setQuery] = useState('');
+	const [results, setResults] = useState<GeoResult[]>([]);
+	const [searching, setSearching] = useState(false);
+	const [locMode, setLocMode] = useState<'type' | 'pick'>('type');
+	const [resultRow, setResultRow] = useState(0);
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	// internal tiles (this settings screen) can't be hidden — you'd be locked out
 	const manageable = {
@@ -112,13 +180,71 @@ export default function Settings ({config, onChange, onClose, onOrderReset, list
 	const flatApps = CATS.flatMap((cat) => manageable[cat]);
 	const rowCount = pane === 'main' ? ROWS.length : flatApps.length;
 
+	const openLocation = () => { setPane('location'); setLocMode('type'); setQuery(''); setResults([]); setResultRow(0); };
+	const closeLocation = () => { setPane('main'); setRow(LOCATION_ROW); setQuery(''); setResults([]); setLocMode('type'); };
+
+	// Debounced geocoder search while typing.
+	useEffect(() => {
+		if (pane !== 'location') return;
+		if (!query.trim()) { setResults([]); setSearching(false); return; }
+		setSearching(true);
+		let alive = true;
+		const id = window.setTimeout(() => {
+			searchCity(query).then((res) => { if (alive) { setResults(res); setSearching(false); } });
+		}, 350);
+		return () => { alive = false; window.clearTimeout(id); };
+	}, [query, pane]);
+
+	// Keep the input focused whenever we're in typing mode (opens the TV keyboard).
+	useEffect(() => {
+		if (pane === 'location' && locMode === 'type') {
+			const id = window.setTimeout(() => inputRef.current?.focus(), 0);
+			return () => window.clearTimeout(id);
+		}
+	}, [pane, locMode]);
+
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
-			const isBack = e.keyCode === 461 || e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack';
+			const typing = pane === 'location' && locMode === 'type';
+			// While typing, Backspace edits text — don't treat it as Back.
+			const isBack = e.keyCode === 461 || e.key === 'GoBack' || e.key === 'Escape'
+				|| (e.key === 'Backspace' && !typing);
+
+			// Typing mode: let characters + the IME through; only steal Back and the
+			// "go to results" keys.
+			if (typing) {
+				if (isBack) { e.preventDefault(); e.stopPropagation(); closeLocation(); return; }
+				if ((e.key === 'Enter' || e.key === 'ArrowDown') && results.length) {
+					e.preventDefault(); e.stopPropagation();
+					inputRef.current?.blur();
+					setLocMode('pick'); setResultRow(0);
+				}
+				return;   // everything else: native input handling
+			}
+
+			// All other contexts fully own the keys.
 			e.preventDefault();
 			e.stopPropagation();
+
+			// Location pane, picking a result
+			if (pane === 'location') {
+				if (isBack) { setLocMode('type'); return; }   // back to editing
+				if (e.key === 'ArrowUp') {
+					if (resultRow <= 0) setLocMode('type');
+					else setResultRow(resultRow - 1);
+					return;
+				}
+				if (e.key === 'ArrowDown') { setResultRow(Math.min(results.length - 1, resultRow + 1)); return; }
+				if (e.key === 'Enter') {
+					const g = results[resultRow];
+					if (g) { onChange({...config, location: {name: g.name, latitude: g.latitude, longitude: g.longitude}}); closeLocation(); }
+					return;
+				}
+				return;
+			}
+
 			if (isBack) {
-				if (pane === 'apps') { setPane('main'); setRow(ROWS.findIndex((r) => r.kind === 'action' && r.action === 'apps')); }
+				if (pane === 'apps') { setPane('main'); setRow(APPS_ROW); }
 				else onClose();
 				return;
 			}
@@ -133,6 +259,7 @@ export default function Settings ({config, onChange, onClose, onOrderReset, list
 			}
 			const def = ROWS[row];
 			if (def.kind === 'info') return;
+			if (def.kind === 'location') { if (e.key === 'Enter') openLocation(); return; }
 			if (def.kind === 'action') {
 				if (e.key !== 'Enter') return;
 				if (def.action === 'reset') { resetOrder(); onOrderReset(); setResetDone(true); }
@@ -147,17 +274,27 @@ export default function Settings ({config, onChange, onClose, onOrderReset, list
 		// capture phase so the app-wide nav handler never sees these keys
 		window.addEventListener('keydown', onKey, true);
 		return () => window.removeEventListener('keydown', onKey, true);
-	}, [pane, row, rowCount, config, onChange, onClose, onOrderReset, flatApps, onToggleHide]);
+	}, [pane, row, rowCount, config, onChange, onClose, onOrderReset, flatApps, onToggleHide, locMode, results, resultRow]);
+
+	const title = pane === 'main' ? 'Settings' : pane === 'apps' ? 'Manage apps' : 'Set location';
+	const hint = pane === 'apps'
+		? '↑↓ select · OK show/hide · Back to settings'
+		: pane === 'location'
+			? (locMode === 'type' ? 'Type a city · ↓ to results · Back to settings' : '↑↓ pick · OK select · Back to edit')
+			: '↑↓ select · ‹ › change · OK open · Back to close';
 
 	return (
 		<div className="absolute inset-0 z-30 flex items-center justify-center" style={{background: 'rgba(0,0,0,0.72)'}}>
 			<div className="m3-card w-[720px] px-10 py-8" style={{animation: 'rise-in 0.35s var(--m3-ease-emphasized) both'}}>
-				<h2 className="mb-6 text-[34px] font-normal tracking-tight" style={{color: ACCENT}}>
-					{pane === 'main' ? 'Settings' : 'Manage apps'}
-				</h2>
+				<h2 className="mb-6 text-[34px] font-normal tracking-tight" style={{color: ACCENT}}>{title}</h2>
 
 				{pane === 'apps' ? (
 					<AppsPane lists={manageable} hidden={hidden} row={row} />
+				) : pane === 'location' ? (
+					<LocationPane
+						inputRef={inputRef} query={query} setQuery={setQuery} results={results}
+						searching={searching} mode={locMode} resultRow={resultRow} currentName={config.location.name}
+					/>
 				) : (
 					<div className="flex flex-col gap-2">
 						{ROWS.map((def, i) => {
@@ -179,6 +316,11 @@ export default function Settings ({config, onChange, onClose, onOrderReset, list
 											<span className="min-w-[104px] text-center font-medium">{def.labels[def.values.indexOf(def.get(config))]}</span>
 											{focused && <span className="opacity-70">›</span>}
 										</span>
+									) : def.kind === 'location' ? (
+										<span className="flex items-center gap-2 text-lg font-medium" style={{color: focused ? ACCENT : 'rgba(255,255,255,0.55)'}}>
+											<span className="max-w-[280px] truncate text-right">{config.location.name}</span>
+											{focused && <span className="opacity-70">›</span>}
+										</span>
 									) : def.kind === 'info' ? (
 										<span className="text-lg font-medium text-white/40">{def.value}</span>
 									) : (
@@ -192,9 +334,7 @@ export default function Settings ({config, onChange, onClose, onOrderReset, list
 					</div>
 				)}
 
-				<p className="mt-6 text-center text-base text-white/40">
-					{pane === 'apps' ? '↑↓ select · OK show/hide · Back to settings' : '↑↓ select · ‹ › change · Back to close'}
-				</p>
+				<p className="mt-6 text-center text-base text-white/40">{hint}</p>
 			</div>
 		</div>
 	);

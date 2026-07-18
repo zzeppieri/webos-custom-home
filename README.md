@@ -29,7 +29,8 @@ the TV completely.
 - **Real launches** — tiles launch the TV's actually-installed apps and switch
   HDMI inputs via LunaService (`applicationManager/launch`).
 - **Widgets** — analog + digital clock, date, and current temperature/conditions
-  from [Open-Meteo](https://open-meteo.com/) (no API key).
+  from [Open-Meteo](https://open-meteo.com/) (no API key). Set your city in
+  **Settings → Location** (city search, saved on-device) — no rebuild needed.
 - **Ambient mode** — after 60s idle it fades to a screensaver-style clock; the
   TV's own screensaver is vetoed so this replaces it.
 - **eARC audio guard** — re-asserts your configured sound output on launch and
@@ -77,14 +78,15 @@ and sideload it (needs the [webOS CLI](https://github.com/webos-tools/cli) and a
 [ares device profile](#point-ares-at-your-tv)):
 
 ```bash
-# download tld.my.customhome_0.2.0_all.ipk from the release, then:
-ares-install --device tv tld.my.customhome_0.2.0_all.ipk
+# download tld.my.customhome_0.3.0_all.ipk from the release, then:
+ares-install --device tv tld.my.customhome_0.3.0_all.ipk
 ares-launch  --device tv tld.my.customhome
 ```
 
-The prebuilt app ships with a placeholder location ("Your City") and the default
-app list — set your own by building from source (below) after editing
-[`src/lib/apps.ts`](src/lib/apps.ts) and [`src/service/weather.ts`](src/service/weather.ts).
+The prebuilt app starts on a placeholder location — **set your own city right in
+the app** (Settings → Location → search), no rebuild needed. The default app
+list is baked in; to change which apps appear, edit
+[`src/lib/apps.ts`](src/lib/apps.ts) and build from source (below).
 For the Home-button/boot takeover, see [step 8 of the tutorial](docs/TUTORIAL.md#8-take-over-the-home-button-and-boot).
 
 ---

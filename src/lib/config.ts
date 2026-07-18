@@ -3,6 +3,12 @@ import {createContext, useContext} from 'react';
 // User-tunable options (QOL config GUI) — persisted in localStorage so nothing
 // needs a code edit + redeploy. App.tsx owns the state; ConfigContext fans it
 // out to the widgets and background.
+export interface GeoLocation {
+	name: string;
+	latitude: number;
+	longitude: number;
+}
+
 export interface HomeConfig {
 	clock24: boolean;
 	tempUnit: 'fahrenheit' | 'celsius';
@@ -10,9 +16,12 @@ export interface HomeConfig {
 	bgDensity: 'low' | 'normal' | 'high';
 	bgSpeed: 'slow' | 'normal' | 'fast';
 	bgTheme: 'classic' | 'mono' | 'ember' | 'aurora';
+	/** Weather location — user-settable in Settings, so the prebuilt app isn't
+	 *  pinned to the placeholder. Defaults to the placeholder in weather.ts. */
+	location: GeoLocation;
 }
 
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 
 export const DEFAULT_CONFIG: HomeConfig = {
 	clock24: false,
@@ -20,7 +29,8 @@ export const DEFAULT_CONFIG: HomeConfig = {
 	bgAnimated: true,
 	bgDensity: 'normal',
 	bgSpeed: 'normal',
-	bgTheme: 'classic'
+	bgTheme: 'classic',
+	location: {name: 'Your City', latitude: 40.7128, longitude: -74.0060}
 };
 
 const KEY = 'home-config-v1';

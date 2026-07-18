@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import Clock from './Clock';
-import {fetchForecast, LOCATION, type Forecast} from '../../service/weather';
+import {fetchForecast, type Forecast} from '../../service/weather';
 import {useConfig} from '../../lib/config';
 
 function DateLine () {
@@ -27,18 +27,18 @@ function hourLabel (h: number, clock24: boolean): string {
 
 // Current conditions + next-5-hours strip + 3-day outlook, one Open-Meteo call.
 function WeatherBlock () {
-	const {tempUnit, clock24} = useConfig();
+	const {tempUnit, clock24, location} = useConfig();
 	const [fc, setFc] = useState<Forecast | null>(null);
 	const [err, setErr] = useState(false);
 	useEffect(() => {
 		let alive = true;
-		const load = () => fetchForecast({...LOCATION, temperatureUnit: tempUnit})
+		const load = () => fetchForecast({...location, temperatureUnit: tempUnit})
 			.then((f) => { if (alive) { setFc(f); setErr(false); } })
 			.catch(() => { if (alive) setErr(true); });
 		load();
 		const id = setInterval(load, 15 * 60_000);
 		return () => { alive = false; clearInterval(id); };
-	}, [tempUnit]);
+	}, [tempUnit, location]);
 
 	if (err) return <div className="text-right text-base font-normal text-white/40">Weather —</div>;
 	if (!fc) return <div className="text-right text-base font-normal text-white/40">Loading…</div>;
