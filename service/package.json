@@ -1,0 +1,4 @@
+{
+    "name": "tld.my.customhome.service",
+    "main": "service.js"
+}

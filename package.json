@@ -1,0 +1,35 @@
+{
+  "name": "custom-home",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "node scripts/deploy.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^0.469.0",
+    "motion": "^11.15.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "browserslist": "^4.24.4",
+    "lightningcss": "^1.29.1",
+    "tailwindcss": "^4.0.0",
+    "tw-animate-css": "^1.2.5",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

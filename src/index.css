@@ -1,0 +1,296 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* OLED-first dark theme. Near-black base (#050505) so the panel's true blacks
+   read as "off". godui components reference these tokens (--background,
+   --foreground, --primary, --color-foreground, etc.). */
+:root {
+	--radius: 0.75rem;
+	--background: oklch(0.03 0 0);
+	--foreground: oklch(0.97 0 0);
+	--card: oklch(0.06 0 0);
+	--card-foreground: oklch(0.97 0 0);
+	--popover: oklch(0.06 0 0);
+	--popover-foreground: oklch(0.97 0 0);
+	--primary: oklch(0.72 0.16 250);
+	--primary-foreground: oklch(0.03 0 0);
+	--secondary: oklch(0.16 0 0);
+	--secondary-foreground: oklch(0.97 0 0);
+	--muted: oklch(0.16 0 0);
+	--muted-foreground: oklch(0.62 0 0);
+	--accent: oklch(0.20 0 0);
+	--accent-foreground: oklch(0.97 0 0);
+	--destructive: oklch(0.58 0.22 27);
+	--border: oklch(0.24 0 0);
+	--input: oklch(0.24 0 0);
+	--ring: oklch(0.72 0.16 250);
+	--chart-1: oklch(0.646 0.222 41.116);
+	--chart-2: oklch(0.6 0.118 184.704);
+	--chart-3: oklch(0.398 0.07 227.392);
+	--chart-4: oklch(0.828 0.189 84.429);
+	--chart-5: oklch(0.769 0.188 70.08);
+	--sidebar: oklch(0.985 0 0);
+	--sidebar-foreground: oklch(0.145 0 0);
+	--sidebar-primary: oklch(0.205 0 0);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.97 0 0);
+	--sidebar-accent-foreground: oklch(0.205 0 0);
+	--sidebar-border: oklch(0.922 0 0);
+	--sidebar-ring: oklch(0.708 0 0);
+	--shadow-2xs: 0 1px 2px rgb(0 0 0 / 0.02);
+	--shadow-xs: 0 1px 3px rgb(0 0 0 / 0.04);
+	--shadow-sm: 0 2px 6px rgb(0 0 0 / 0.05);
+	--shadow: 0 4px 12px rgb(0 0 0 / 0.06);
+	--shadow-md: 0 8px 20px rgb(0 0 0 / 0.08);
+	--shadow-lg: 0 16px 32px rgb(0 0 0 / 0.1);
+	--shadow-xl: 0 24px 48px rgb(0 0 0 / 0.12);
+	--shadow-2xl: 0 40px 80px rgb(0 0 0 / 0.16);
+	--god-gradient: linear-gradient(135deg, oklch(0.55 0.19 266) 0%, oklch(1 0 0) 50%, oklch(0.85 0.12 90) 100%);
+	--god-glow: 0 0 24px oklch(0.55 0.19 266 / 0.14), 0 0 80px oklch(0.85 0.12 90 / 0.06);
+	--glow-highlight: 61, 102, 223;
+	--color-primary-rgb: 61, 102, 223;
+	--rainbow-1: oklch(0.55 0.19 266);
+	--rainbow-2: oklch(0.68 0.16 305);
+	--rainbow-3: oklch(0.82 0.1 185);
+	--rainbow-4: oklch(0.78 0.12 14);
+	--rainbow-5: oklch(0.8 0.13 90);
+	--rainbow-speed: 2s;
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--radius-lg: var(--radius);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-sm: calc(var(--radius) - 4px);
+	--font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+	--font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	--radius-xl: calc(var(--radius) + 4px);
+	--button-py-sm: 0.5rem;
+	--button-px-sm: 1rem;
+	--button-text-sm: 0.875rem;
+	--button-leading-sm: 1.25rem;
+	--button-radius-sm: var(--radius-md);
+	--button-py-md: 0.75rem;
+	--button-px-md: 1.5rem;
+	--button-text-md: 0.875rem;
+	--button-leading-md: 1.25rem;
+	--button-radius-md: var(--radius-lg);
+	--button-py-lg: 1rem;
+	--button-px-lg: 2rem;
+	--button-text-lg: 1rem;
+	--button-leading-lg: 1.5rem;
+	--button-radius-lg: var(--radius-xl);
+	--rainbow-speed: var(--rainbow-speed);
+	--color-rainbow-5: var(--rainbow-5);
+	--color-rainbow-4: var(--rainbow-4);
+	--color-rainbow-3: var(--rainbow-3);
+	--color-rainbow-2: var(--rainbow-2);
+	--color-rainbow-1: var(--rainbow-1);
+	--color-primary-rgb: var(--color-primary-rgb);
+	--glow-highlight: var(--glow-highlight);
+	--god-glow: var(--god-glow);
+	--god-gradient: var(--god-gradient);
+	--shadow-2xl: var(--shadow-2xl);
+	--shadow-xl: var(--shadow-xl);
+	--shadow-lg: var(--shadow-lg);
+	--shadow-md: var(--shadow-md);
+	--shadow: var(--shadow);
+	--shadow-sm: var(--shadow-sm);
+	--shadow-xs: var(--shadow-xs);
+	--shadow-2xs: var(--shadow-2xs);
+	--color-sidebar-ring: var(--sidebar-ring);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar: var(--sidebar);
+	--color-chart-5: var(--chart-5);
+	--color-chart-4: var(--chart-4);
+	--color-chart-3: var(--chart-3);
+	--color-chart-2: var(--chart-2);
+	--color-chart-1: var(--chart-1);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
+}
+
+* {
+	border-color: var(--border);
+}
+
+html, body, #root {
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: "Inter Variable", system-ui, -apple-system, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	overflow: hidden;
+	/* TV: no cursor, no text selection, no scrollbars */
+	cursor: none;
+	user-select: none;
+}
+
+/* Soft glow helpers for the elegant dark look. */
+.glow-sm { text-shadow: 0 0 12px rgba(255, 255, 255, 0.18); }
+.glow-accent { text-shadow: 0 0 18px var(--glow, rgba(140, 170, 255, 0.55)); }
+
+.dark {
+	--background: oklch(0.145 0 0);
+	--foreground: oklch(0.985 0 0);
+	--card: oklch(0.205 0 0);
+	--card-foreground: oklch(0.985 0 0);
+	--popover: oklch(0.205 0 0);
+	--popover-foreground: oklch(0.985 0 0);
+	--primary: oklch(0.922 0 0);
+	--primary-foreground: oklch(0.205 0 0);
+	--secondary: oklch(0.269 0 0);
+	--secondary-foreground: oklch(0.985 0 0);
+	--accent: oklch(0.269 0 0);
+	--accent-foreground: oklch(0.985 0 0);
+	--muted: oklch(0.269 0 0);
+	--muted-foreground: oklch(0.708 0 0);
+	--destructive: oklch(0.704 0.191 22.216);
+	--border: oklch(1 0 0 / 10%);
+	--input: oklch(1 0 0 / 15%);
+	--ring: oklch(0.556 0 0);
+	--chart-1: oklch(0.488 0.243 264.376);
+	--chart-2: oklch(0.696 0.17 162.48);
+	--chart-3: oklch(0.769 0.188 70.08);
+	--chart-4: oklch(0.627 0.265 303.9);
+	--chart-5: oklch(0.645 0.246 16.439);
+	--sidebar: oklch(0.205 0 0);
+	--sidebar-foreground: oklch(0.985 0 0);
+	--sidebar-primary: oklch(0.488 0.243 264.376);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.269 0 0);
+	--sidebar-accent-foreground: oklch(0.985 0 0);
+	--sidebar-border: oklch(1 0 0 / 10%);
+	--sidebar-ring: oklch(0.556 0 0);
+	--shadow-2xs: 0 1px 2px rgb(0 0 0 / 0.12);
+	--shadow-xs: 0 1px 3px rgb(0 0 0 / 0.15);
+	--shadow-sm: 0 2px 6px rgb(0 0 0 / 0.2);
+	--shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+	--shadow-md: 0 8px 20px rgb(0 0 0 / 0.3);
+	--shadow-lg: 0 16px 32px rgb(0 0 0 / 0.35);
+	--shadow-xl: 0 24px 48px rgb(0 0 0 / 0.4);
+	--shadow-2xl: 0 40px 80px rgb(0 0 0 / 0.5);
+	--god-gradient: linear-gradient(135deg, oklch(0.72 0.15 266) 0%, oklch(1 0 0) 50%, oklch(0.86 0.12 90) 100%);
+	--god-glow: 0 0 24px oklch(0.72 0.15 266 / 0.28), 0 0 80px oklch(0.86 0.12 90 / 0.12);
+	--glow-highlight: 120, 160, 255;
+	--color-primary-rgb: 120, 160, 255;
+	--rainbow-1: oklch(0.72 0.15 266);
+	--rainbow-2: oklch(0.74 0.16 305);
+	--rainbow-3: oklch(0.84 0.1 185);
+	--rainbow-4: oklch(0.8 0.12 14);
+	--rainbow-5: oklch(0.84 0.13 90);
+	--rainbow-speed: 2s;
+}
+
+@layer base {
+  :is(code, kbd, samp, pre) {
+    font-family: var(--font-mono);
+	}
+}
+
+/* --- Material You (Material 3) system layer -----------------------------
+   Shape scale, emphasized motion tokens, and tonal neutral surfaces. The
+   base stays OLED near-black; "container" surfaces are lifted neutrals with
+   a faint primary tint (M3 surface-tint). Inline styles reference the motion
+   vars directly (var() resolves in inline `transition`/`animation`). */
+:root,
+.dark {
+	/* M3 easing */
+	--m3-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+	--m3-ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);   /* emphasized decelerate */
+	--m3-ease-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+	/* M3 duration */
+	--m3-dur-short: 200ms;
+	--m3-dur-medium: 350ms;
+	--m3-dur-long: 500ms;
+	/* M3 shape scale */
+	--m3-shape-sm: 0.5rem;
+	--m3-shape-md: 0.75rem;
+	--m3-shape-lg: 1rem;
+	--m3-shape-xl: 1.75rem;   /* 28px — cards, tiles */
+	--m3-shape-full: 999px;   /* pills, chips */
+	/* M3 tonal neutral surfaces (OLED base + faint indigo tint on lifts) */
+	--m3-surface: oklch(0.02 0 0);
+	--m3-surface-container: oklch(0.17 0.014 265);
+	--m3-surface-container-high: oklch(0.22 0.016 265);
+	--m3-outline: oklch(0.7 0.02 265 / 0.22);
+	--m3-outline-variant: oklch(0.7 0.02 265 / 0.11);
+	--m3-on-surface: oklch(0.97 0 0);
+	--m3-on-surface-variant: oklch(0.75 0.01 265);
+}
+
+/* M3 elevated surface card (used by the widget cluster). */
+.m3-card {
+	background:
+		linear-gradient(160deg, oklch(0.19 0.015 265 / 0.86), oklch(0.14 0.012 265 / 0.78));
+	border: 1px solid var(--m3-outline-variant);
+	border-radius: var(--m3-shape-xl);
+	box-shadow: 0 20px 50px -24px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+.m3-divider { height: 1px; width: 100%; background: var(--m3-outline-variant); }
+
+/* Idle chevron nudge — compositor-only transforms; applied on the home screen only. */
+@keyframes nudge-up { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes nudge-down { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+@keyframes nudge-left { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-5px); } }
+@keyframes nudge-right { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
+/* Home entrance (one-shot, CSS) */
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes chip-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+/* Launch feedback — quick press-pulse on the focused tile (compositor-only). */
+@keyframes launch-pulse { 0% { transform: scale(1.05); } 40% { transform: scale(0.96); } 100% { transform: scale(1.05); } }
+
+/* --- OLED overrides (last in source order → win over shadcn's gray dark theme).
+   Near-pure black so the panel's true blacks read as "off". --- */
+:root,
+.dark {
+	--background: oklch(0.02 0 0);
+	--foreground: oklch(0.97 0 0);
+	--card: oklch(0.05 0 0);
+	--card-foreground: oklch(0.97 0 0);
+	--popover: oklch(0.05 0 0);
+	--popover-foreground: oklch(0.97 0 0);
+	--primary: oklch(0.72 0.16 250);
+	--primary-foreground: oklch(0.02 0 0);
+	--secondary: oklch(0.16 0 0);
+	--secondary-foreground: oklch(0.97 0 0);
+	--muted: oklch(0.14 0 0);
+	--muted-foreground: oklch(0.60 0 0);
+	--accent: oklch(0.18 0 0);
+	--accent-foreground: oklch(0.97 0 0);
+	--border: oklch(0.22 0 0);
+	--input: oklch(0.22 0 0);
+	--ring: oklch(0.72 0.16 250);
+}

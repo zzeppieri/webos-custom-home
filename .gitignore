@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+*.ipk
+
+# logs
+*.log
+
+# large local asset scratch (source art, spare icons, experiments)
+_assets-backup/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# local env overrides
+.env
+.env.local

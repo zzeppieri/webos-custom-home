@@ -1,0 +1,9 @@
+{
+    "id": "tld.my.customhome.service",
+    "description": "Home-button watcher and app launcher for the custom home screen",
+    "services": [
+        {
+            "name": "tld.my.customhome.service"
+        }
+    ]
+}
