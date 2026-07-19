@@ -70,24 +70,34 @@ webOS `ares` CLI.
 
 ---
 
-## Quick install (prebuilt)
+## Quick install (one-click)
 
-Don't want to build it? Grab the packaged app from the
+Don't want to build anything? If your TV is already
+[rooted](https://github.com/webosbrew/webos-homebrew-channel) with SSH enabled,
+grab the launcher for your OS from the
 [**latest release**](https://github.com/zzeppieri/webos-custom-home/releases/latest)
-and sideload it (needs the [webOS CLI](https://github.com/webos-tools/cli) and an
-[ares device profile](#point-ares-at-your-tv)):
+and run it — it asks for your TV's IP and does the rest (install + boot autostart
++ HOME-button takeover) over SSH. No Node, no `ares` CLI, no building.
+
+| Your computer | File | How to run |
+|---|---|---|
+| **Windows 10/11** | `install.bat` | Double-click |
+| **macOS** | `install.command` | Double-click (right-click → Open the first time) |
+| **Linux / WSL / Git Bash** | `install.command` | `bash install.command` |
+
+Or, from any terminal, the same thing as a one-liner:
 
 ```bash
-# download tld.my.customhome_0.3.0_all.ipk from the release, then:
-ares-install --device tv tld.my.customhome_0.3.0_all.ipk
-ares-launch  --device tv tld.my.customhome
+ssh root@<TV_IP> "curl -fsSL https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.0/tv-install.sh | sh"
 ```
+
+See [`installer/`](installer/) for details and the uninstaller. Prefer the
+classic `ares` sideload? `ares-install --device tv <the .ipk from the release>`.
 
 The prebuilt app starts on a placeholder location — **set your own city right in
 the app** (Settings → Location → search), no rebuild needed. The default app
 list is baked in; to change which apps appear, edit
 [`src/lib/apps.ts`](src/lib/apps.ts) and build from source (below).
-For the Home-button/boot takeover, see [step 8 of the tutorial](docs/TUTORIAL.md#8-take-over-the-home-button-and-boot).
 
 ---
 
