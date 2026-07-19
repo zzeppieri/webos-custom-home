@@ -9,7 +9,7 @@ import {DIRECTION_TO_SCREEN, SCREENS, worldForScreen, type Direction, type Scree
 import type {AppItem} from './lib/apps';
 import {buildLists, saveOrders, loadHidden, saveHidden, type CatId} from './lib/order';
 import {ConfigContext, loadConfig, saveConfig, type HomeConfig} from './lib/config';
-import {launchApp, listLaunchPoints, blockScreenSaver, assertSoundOutput, isWebOS} from './service/luna';
+import {launchApp, listLaunchPoints, blockScreenSaver, assertSoundOutput, guardSoundOutputOnBoot, isWebOS} from './service/luna';
 
 const IDLE_MS = 60_000;      // no input for this long → ambient clock
 const JITTER_MS = 150_000;   // OLED guard: shift the whole UI ±2px this often
@@ -82,15 +82,17 @@ export default function App () {
 
 	// eARC guard: LG home re-negotiates audio routing on focus changes; we don't,
 	// so the receiver can lose audio after boot or after we launch an app.
-	// Re-assert the configured sound output on startup and every time our app
-	// regains the foreground (returning from a launched app).
+	// On cold boot the TV resumes its last HDMI input before the (cold, slow)
+	// eARC handshake finishes, so audiod falls back to tv_speaker; a single kick
+	// loses that race. guardSoundOutputOnBoot re-asserts until it sticks. On
+	// return-to-foreground (from a launched app) eARC is already warm, so one
+	// re-assert is enough.
 	useEffect(() => {
 		if (!isWebOS()) return;
-		const kick = () => { assertSoundOutput().catch(() => { /* best-effort */ }); };
-		kick();
-		const onVis = () => { if (!document.hidden) kick(); };
+		const cancelBootGuard = guardSoundOutputOnBoot();
+		const onVis = () => { if (!document.hidden) assertSoundOutput().catch(() => { /* best-effort */ }); };
 		document.addEventListener('visibilitychange', onVis);
-		return () => document.removeEventListener('visibilitychange', onVis);
+		return () => { cancelBootGuard(); document.removeEventListener('visibilitychange', onVis); };
 	}, []);
 
 	// Idle → ambient. Any input exits ambient and resets the timer. Nav is

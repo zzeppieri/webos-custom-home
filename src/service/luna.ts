@@ -68,12 +68,61 @@ export function launchApp (id: string, params: Params = {}): Promise<unknown> {
  * Param name verified on this TV (webOS 24): {soundOutput: ...}, NOT {output: ...}.
  */
 export function assertSoundOutput (): Promise<void> {
+	return getSoundOutputState().then(({configured}) =>
+		lunaCall('com.webos.service.audio', 'setSoundOutput', {soundOutput: configured}).then(() => undefined)
+	);
+}
+
+/** Read both the user's *configured* sound output (persisted) and the *current*
+ *  live one. audiod reports the persisted config in settingsSoundOutputs, so we
+ *  target that — never the (possibly fallen-back) current value. */
+export function getSoundOutputState (): Promise<{configured: string; current: string}> {
 	return lunaCall<{soundOutput?: string; settingsSoundOutputs?: string[]}>(
 		'com.webos.service.audio', 'getSoundOutput'
-	).then((s) => {
-		const out = s.settingsSoundOutputs?.[0] ?? s.soundOutput ?? 'external_arc';
-		return lunaCall('com.webos.service.audio', 'setSoundOutput', {soundOutput: out}).then(() => undefined);
-	});
+	).then((s) => ({
+		configured: s.settingsSoundOutputs?.[0] ?? s.soundOutput ?? 'external_arc',
+		current: s.soundOutput ?? '',
+	}));
+}
+
+/**
+ * Cold-boot audio guard. On a cold boot the TV resumes its last HDMI input and
+ * grabs audio focus *before* the eARC receiver has finished its (slow, cold)
+ * handshake — the receiver is powering up at the same time — so audiod has no
+ * eARC sink yet and falls back to sound_output:tv_speaker. A single re-assert
+ * fired at app mount loses this race: it runs before eARC is ready and gets
+ * bounced straight back to tv_speaker, with nothing to retry it (the old
+ * single-shot kick's exact failure). This polls getSoundOutput and re-asserts
+ * the *configured* output until it reads back stable (two consecutive confirms,
+ * to survive a transient-then-bounce) or the window elapses. A cold eARC link
+ * can take 15-30s, so the window is generous. Returns a cancel fn; no-op
+ * off-webOS. Hub timeouts/errors are swallowed and simply retried next tick.
+ */
+export function guardSoundOutputOnBoot (windowMs = 45_000, intervalMs = 2_000): () => void {
+	if (!isWebOS()) return () => { /* not on webOS */ };
+	let cancelled = false;
+	let confirms = 0;
+	const start = Date.now();
+	const tick = () => {
+		if (cancelled) return;
+		getSoundOutputState()
+			.then(({configured, current}) => {
+				if (cancelled) return undefined;
+				if (current === configured) { confirms += 1; return undefined; }
+				confirms = 0;
+				return lunaCall('com.webos.service.audio', 'setSoundOutput', {soundOutput: configured})
+					.then(() => undefined).catch(() => undefined);
+			})
+			.catch(() => { confirms = 0; })
+			.finally(() => {
+				if (cancelled) return;
+				if (confirms >= 2) return;                    // stable on configured output — done
+				if (Date.now() - start >= windowMs) return;   // window elapsed — give up quietly
+				window.setTimeout(tick, intervalMs);
+			});
+	};
+	tick();
+	return () => { cancelled = true; };
 }
 
 export interface LaunchPoint {id: string; title: string; icon: string; launchPointId?: string}
