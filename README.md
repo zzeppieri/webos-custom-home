@@ -79,8 +79,8 @@ Don't want to build anything? If your TV is already
 [rooted](https://github.com/webosbrew/webos-homebrew-channel) with SSH enabled,
 grab the launcher for your OS from the
 [**latest release**](https://github.com/zzeppieri/webos-custom-home/releases/latest)
-and run it — it asks for your TV's IP and does the rest (install + boot autostart
-+ HOME-button takeover) over SSH. No Node, no `ares` CLI, no building.
+and run it — it asks for your TV's IP and does the rest --install + boot autostart
++ HOME-button takeover-- over SSH. No Node, no `ares` CLI, no building.
 
 | Your computer | File | How to run |
 |---|---|---|
