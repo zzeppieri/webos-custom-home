@@ -91,7 +91,7 @@ and run it — it asks for your TV's IP and does the rest (install + boot autost
 Or, from any terminal, the same thing as a one-liner:
 
 ```bash
-ssh root@<TV_IP> "curl -fsSL https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.0/tv-install.sh | sh"
+ssh root@<TV_IP> "curl -fsSL https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.1/tv-install.sh | sh"
 ```
 
 See [`installer/`](installer/) for details and the uninstaller. Prefer the

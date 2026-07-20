@@ -7,10 +7,10 @@
 # It asks for your TV's IP and installs everything over SSH. Nothing to build or
 # download by hand. Your TV must already be ROOTED (Homebrew Channel) with SSH on.
 
-INSTALLER_URL="https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.0/tv-install.sh"
+INSTALLER_URL="https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.1/tv-install.sh"
 
 echo "=================================================="
-echo "  webOS Custom Home  —  one-click installer (v0.4.0)"
+echo "  webOS Custom Home  —  one-click installer (v0.4.1)"
 echo "=================================================="
 echo
 echo "Before you start, your LG TV must be:"
