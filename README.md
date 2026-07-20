@@ -33,9 +33,12 @@ the TV completely.
   **Settings → Location** (city search, saved on-device) — no rebuild needed.
 - **Ambient mode** — after 60s idle it fades to a screensaver-style clock; the
   TV's own screensaver is vetoed so this replaces it.
-- **eARC audio guard** — re-asserts your configured sound output on launch and
-  on foreground, so an eARC/ARC receiver doesn't lose audio the way it can with a
-  bare app launch. See [`src/service/luna.ts`](src/service/luna.ts).
+- **eARC audio guard** — keeps audio on your configured output (e.g. an eARC/ARC
+  receiver), which a bare app launch or a cold power-cycle can otherwise drop to
+  the TV speakers. It *subscribes* to the live sound output and re-asserts the
+  moment it drifts, and keeps retrying through the cold-boot window while the
+  receiver's eARC link is still coming up. See
+  [`src/service/luna.ts`](src/service/luna.ts).
 - **Home button + autostart** — an in-package LunaService watches the remote's
   HOME key and relaunches the app; a webosbrew init.d hook boots into it. See
   [How the Home takeover works](#how-the-home-takeover-works).
