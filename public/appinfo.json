@@ -1,6 +1,6 @@
 {
   "id": "tld.my.customhome",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "vendor": "me",
   "type": "web",
   "main": "index.html",

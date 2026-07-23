@@ -5,10 +5,10 @@ REM Just double-click this file. It asks for your TV's IP and installs everythin
 REM over SSH (ssh + curl ship with Windows 10/11). Your TV must already be ROOTED
 REM (Homebrew Channel) with SSH enabled.
 
-set "INSTALLER_URL=https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.1/tv-install.sh"
+set "INSTALLER_URL=https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.2/tv-install.sh"
 
 echo ==================================================
-echo   webOS Custom Home  -  one-click installer (v0.4.1)
+echo   webOS Custom Home  -  one-click installer (v0.4.2)
 echo ==================================================
 echo.
 echo Before you start, your LG TV must be:

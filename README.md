@@ -91,11 +91,26 @@ and run it — it asks for your TV's IP and does the rest --install + boot autos
 Or, from any terminal, the same thing as a one-liner:
 
 ```bash
-ssh root@<TV_IP> "curl -fsSL https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.1/tv-install.sh | sh"
+ssh root@<TV_IP> "curl -fsSL https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.2/tv-install.sh | sh"
 ```
 
 See [`installer/`](installer/) for details and the uninstaller. Prefer the
 classic `ares` sideload? `ares-install --device tv <the .ipk from the release>`.
+
+> **eARC receiver losing audio on power-on?** Some LG TVs bring an eARC/ARC AV
+> receiver up *desynced* after a cold boot or standby-wake — the TV shows the
+> receiver as the sound output but nothing comes through, and you have to toggle
+> eARC off/on by hand each time. The **eARC edition** fixes this automatically: its
+> bundled service re-handshakes the eARC link ~10s after every boot and wake. It
+> elevates the service (via the Homebrew Channel's own `elevate-service`) and causes
+> a brief (~2s) audio blip on each power-on, so it's a **separate opt-in download** —
+> use it only if you have this exact problem:
+>
+> ```bash
+> ssh root@<TV_IP> "curl -fsSL https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.2/tv-install-earc.sh | sh"
+> ```
+>
+> Everyone else should use the standard install above (it never touches eARC).
 
 The prebuilt app starts on a placeholder location — **set your own city right in
 the app** (Settings → Location → search), no rebuild needed. The default app
