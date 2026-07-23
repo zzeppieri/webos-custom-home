@@ -2,5 +2,8 @@
 # They MUST use LF — a CRLF creates a stray \r that breaks busybox sh ("Illegal number").
 # Force LF regardless of the developer's core.autocrlf setting.
 *.sh text eol=lf
+*.command text eol=lf
 service/service.js text eol=lf
 service/autostart.sh text eol=lf
+# Windows batch must stay CRLF
+*.bat text eol=crlf
