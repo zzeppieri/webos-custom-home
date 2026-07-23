@@ -11,7 +11,7 @@
 
 APP_ID="tld.my.customhome"
 IPK_URL="https://github.com/zzeppieri/webos-custom-home/releases/download/v0.4.1/tld.my.customhome_0.4.1_all.ipk"
-IPK_HASH="703dffaaea0f899d81109a525c75dff024fa45df8425c81beba35361486bfaad"  # sha256 of the ipk
+IPK_HASH="e1f7c6205b18d5b900052bba265b0fcec274df236ab61fe14fbd3663adf16a39"  # sha256 of the ipk
 SVCDIR="/media/developer/apps/usr/palm/services/${APP_ID}.service"
 INITD="/var/lib/webosbrew/init.d/50-customhome"
 HB="luna://org.webosbrew.hbchannel.service/install"
